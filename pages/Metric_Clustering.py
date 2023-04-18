@@ -28,7 +28,7 @@ run = st.sidebar.button('Run')
 st.sidebar.header("Inputs")
 
 
-url = st.sidebar.text_input('url', value=DEFAULT_URL, help='netdata agent dashboard url to pull host,after,before from')
+url = st.sidebar.text_input('url', value=DEFAULT_URL, help='netdata agent dashboard url to pull host/after/before params from')
 host = st.sidebar.text_input('host', value=DEFAULT_HOST, help='netdata host to pull data from')
 after = st.sidebar.number_input('after', value=DEFAULT_AFTER)
 before = st.sidebar.number_input('before', value=DEFAULT_BEFORE)
