@@ -6,7 +6,7 @@ App is available to play with it at: https://andrewm4894-netdata-ml-apps-home-uv
 
 ```bash
 # clone repo
-gh repo clone andrewm4894/netdata-ml-apps
+git clone https://github.com/andrewm4894/netdata-ml-apps.git .
 
 # cd into repo
 cd netdata-ml-apps
