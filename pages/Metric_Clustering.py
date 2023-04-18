@@ -7,6 +7,10 @@ from netdata_pandas.data import get_data
 
 st.set_page_config(page_title="Metric Clustering", page_icon="📈")
 
+landing_text = """
+Enter inputs and click "Run" in sidebar to generate the heatmap.
+"""
+
 st.markdown("# Metric Clustering")
 
 run = st.sidebar.button('Run')
@@ -19,10 +23,15 @@ before = st.sidebar.number_input('before', value=0)
 charts_regex = st.sidebar.text_input('charts_regex', value='system|apps|users|services\..*')
 freq = st.sidebar.text_input('freq', value='15s')
 n_clusters = st.sidebar.number_input('n_clusters', value=15)
-fig_w = st.sidebar.number_input('fig_w', value=900)
-fig_h = st.sidebar.number_input('fig_h', value=25)
+opts = st.sidebar.text_input('opts', value='fig_w=900, fig_h=25')
+opts_dict = {opt.split('=')[0].strip():opt.split('=')[1].strip() for opt in opts.split(',')}
+fig_w = int(opts_dict.get('fig_w','900'))
+fig_h = int(opts_dict.get('fig_h','25'))
 
-if run: 
+
+if run:
+    
+    # get data from netdata
     df = get_data(
         hosts=[host], 
         after=after, 
@@ -69,7 +78,7 @@ if run:
     st.plotly_chart(fig)
 
 else:
-    st.write('Click "Run" to generate the heatmap')
+    st.write(landing_text)
 
 
 
