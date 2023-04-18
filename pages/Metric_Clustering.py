@@ -20,11 +20,11 @@ st.sidebar.header("Inputs")
 host = st.sidebar.text_input('host', value='london.my-netdata.io')
 after = st.sidebar.number_input('after', value=-60*15)
 before = st.sidebar.number_input('before', value=0)
-charts_regex = st.sidebar.text_input('charts_regex', value='system|apps|users|services\..*')
-freq = st.sidebar.text_input('freq', value='15s')
-n_clusters = st.sidebar.number_input('n_clusters', value=15)
-opts = st.sidebar.text_input('opts', value='fig_w=900, fig_h=25')
-opts_dict = {opt.split('=')[0].strip():opt.split('=')[1].strip() for opt in opts.split(',')}
+charts_regex = st.sidebar.text_input('charts_regex', value='system|apps|users|services\..*', help='regex to match charts')
+opts = st.sidebar.text_area('opts', value='n_clusters=15\nfreq=15s\nfig_w=900\nfig_h=25', help='optional key=value params separated by new line')
+opts_dict = {opt.split('=')[0].strip():opt.split('=')[1].strip() for opt in opts.split('\n')}
+n_clusters = int(opts_dict.get('n_clusters','15'))
+freq = str(opts_dict.get('freq','15s'))
 fig_w = int(opts_dict.get('fig_w','900'))
 fig_h = int(opts_dict.get('fig_h','25'))
 
