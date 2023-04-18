@@ -1,6 +1,8 @@
 # netdata-ml-apps
 
-App is available to play with it at: https://andrewm4894-netdata-ml-apps-home-uvftgr.streamlit.app/
+App is available to play with on [Streamlit Community Cloud](https://streamlit.io/cloud) here: 
+
+https://andrewm4894-netdata-ml-apps-home-uvftgr.streamlit.app/
 
 ## Running locally
 
