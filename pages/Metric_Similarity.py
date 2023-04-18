@@ -4,6 +4,7 @@ import pandas as pd
 from netdata_pandas.data import get_data
 from scipy.spatial.distance import cdist
 
+# defaults
 DEFAULT_HOST = 'london.my-netdata.io'
 DEFAULT_URL = ''
 DEFAULT_AFTER = -60*15
@@ -21,10 +22,11 @@ Enter inputs and click "Run" in sidebar to find similar metrics.
 
 st.markdown("# Metric Similarity")
 
+# create run button
 run = st.sidebar.button('Run')
+
+# inputs
 st.sidebar.header("Inputs")
-
-
 url = st.sidebar.text_input('url', value=DEFAULT_URL, help='netdata agent dashboard url to pull host/after/before params from')
 host = st.sidebar.text_input('host', value=DEFAULT_HOST, help='netdata host to pull data from')
 after = st.sidebar.number_input('after', value=DEFAULT_AFTER)
@@ -36,6 +38,7 @@ opts_dict = {opt.split('=')[0].strip():opt.split('=')[1].strip() for opt in opts
 freq = str(opts_dict.get('freq',DEFAULT_FREQ))
 top_n = int(opts_dict.get('top_n',DEFAULT_TOP_N))
 
+# parse url if provided
 if url != '':
     url_parsed = urlparse(url)
     url_fragments = {x.split('=')[0]:x.split('=')[1] for x in url_parsed.fragment.split(';') if '=' in x}
@@ -45,6 +48,7 @@ if url != '':
     after = int(int(url_fragments.get('after')) / 1000)
     before = int(int(url_fragments.get('before')) / 1000)
 
+# if run button is pressed, run the code
 if run:
     
     # get data from agent 
@@ -61,12 +65,18 @@ if run:
     df_raw = df.copy()
     
     # normalize data for similarity calculation
+    # https://en.wikipedia.org/wiki/Feature_scaling#Rescaling_(min-max_normalization)
     df = (df - df.min()) / (df.max() - df.min())
-    df = df.fillna(0)
+    
+    # ffill and bfill any missing data
+    df = df.ffill().bfill()
     
     # get metric distances
+    data_target_metric = df[[target_metric]].ffill().bfill().transpose()
+    data_other_metrics = df.ffill().bfill().transpose()
+    pairwise_distances = cdist(data_target_metric, data_other_metrics, 'cosine')[0]
     df_dist = pd.DataFrame(
-        data=zip(df.columns, cdist(df[[target_metric]].fillna(0).transpose(), df.fillna(0).transpose(), 'cosine')[0]),
+        data=zip(df.columns, pairwise_distances),
         columns=['metric', 'distance']
     )
     
@@ -85,8 +95,8 @@ if run:
     plot_cols = df_dist_top_n.index.values.tolist()
     
     # plot top_n cols similairty
-    st.write('## Top {} most similar metrics'.format(top_n))
-    st.dataframe(df_dist_top_n)
+    st.write(f'## Top {top_n} most similar metrics')
+    st.dataframe(df_dist_top_n[['similarity','rank']])
     
     # plot top_n most similar metrics
     for col in plot_cols:

@@ -5,6 +5,7 @@ from sklearn.cluster import KMeans
 import plotly.express as px
 from netdata_pandas.data import get_data
 
+# defaults
 DEFAULT_HOST = 'london.my-netdata.io'
 DEFAULT_URL = ''
 DEFAULT_AFTER = -60*15
@@ -24,10 +25,11 @@ Enter inputs and click "Run" in sidebar to generate the heatmap.
 
 st.markdown("# Metric Clustering")
 
+# create run button
 run = st.sidebar.button('Run')
+
+# inputs
 st.sidebar.header("Inputs")
-
-
 url = st.sidebar.text_input('url', value=DEFAULT_URL, help='netdata agent dashboard url to pull host/after/before params from')
 host = st.sidebar.text_input('host', value=DEFAULT_HOST, help='netdata host to pull data from')
 after = st.sidebar.number_input('after', value=DEFAULT_AFTER)
@@ -40,6 +42,7 @@ freq = str(opts_dict.get('freq',DEFAULT_FREQ))
 fig_w = int(opts_dict.get('fig_w',DEFAULT_FIG_W))
 fig_h = int(opts_dict.get('fig_h',DEFAULT_FIG_H))
 
+# parse url if provided
 if url != '':
     url_parsed = urlparse(url)
     url_fragments = {x.split('=')[0]:x.split('=')[1] for x in url_parsed.fragment.split(';') if '=' in x}
@@ -49,6 +52,7 @@ if url != '':
     after = int(int(url_fragments.get('after')) / 1000)
     before = int(int(url_fragments.get('before')) / 1000)
 
+# if run button is pressed, run the code
 if run:
     
     # get data from netdata
@@ -72,17 +76,20 @@ if run:
     df = df.dropna(axis=1,how='all')
 
     # get X matrix to feed into clustering
+    # transpose so that each row is a metric as thats what we want to cluster
     X = df.transpose().dropna().values
 
     # cluster the data
     cluster = KMeans(n_clusters=n_clusters, n_init=5).fit(X)
 
-    # sort based on clustering
+    # sort based on cluster labels
     df_cols_sorted = pd.DataFrame(
         zip(df.columns, cluster.labels_),
         columns=['metric', 'cluster']
         ).sort_values('cluster', ascending=False)
     cols_sorted = df_cols_sorted['metric'].values.tolist()
+
+    # rename columns to include cluster number
     cols_renamed = [f'{c} ({i})' for c,i in zip(df_cols_sorted['metric'].values, df_cols_sorted['cluster'].values)]
     df = df[cols_sorted]
     df.columns = cols_renamed
@@ -98,7 +105,6 @@ if run:
     st.plotly_chart(fig)
 
 else:
+    
+    # if run button is not pressed, show landing text
     st.write(landing_text)
-
-
-

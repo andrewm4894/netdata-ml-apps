@@ -4,6 +4,11 @@ App is available to play with on [Streamlit Community Cloud](https://streamlit.i
 
 https://andrewm4894-netdata-ml-apps-home-uvftgr.streamlit.app/
 
+## Apps
+
+- [Metric Clustering](/pages/Metric_Clustering.py) : Cluster your metrics on to a heatmap to find groups of similar patterns.
+- [Metric Similarity](/pages/Metric_Similarity.py) : Given a metric of interest find what other metrics are most similar looking.
+
 ## Running locally
 
 ```bash
