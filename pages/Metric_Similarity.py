@@ -1,8 +1,17 @@
 import streamlit as st
+from urllib.parse import urlparse
 import pandas as pd
 from netdata_pandas.data import get_data
 from scipy.spatial.distance import cdist
 
+DEFAULT_HOST = 'london.my-netdata.io'
+DEFAULT_URL = ''
+DEFAULT_AFTER = -60*15
+DEFAULT_BEFORE = 0
+DEFAULT_TARGET_METRIC = 'system.cpu|user'
+DEFAULT_CHARTS_REGEX = 'system|apps|users|services|groups\..*'
+DEFAULT_FREQ = '15s'
+DEFAULT_TOP_N = 15
 
 st.set_page_config(page_title="Metric Similarity", page_icon="📈")
 
@@ -16,16 +25,25 @@ run = st.sidebar.button('Run')
 st.sidebar.header("Inputs")
 
 
-host = st.sidebar.text_input('host', value='london.my-netdata.io')
-after = st.sidebar.number_input('after', value=-60*15)
-before = st.sidebar.number_input('before', value=0)
-target_metric = st.sidebar.text_input('target_metric', value='system.cpu|user', help='metric to compare other metrics to')
-charts_regex = st.sidebar.text_input('charts_regex', value='system|apps|users|services\..*', help='regex to match charts')
-opts = st.sidebar.text_area('opts', value='freq=15s\ntop_n=50', help='optional key=value params separated by new line')
+url = st.sidebar.text_input('url', value=DEFAULT_URL, help='netdata agent dashboard url to pull host,after,before from')
+host = st.sidebar.text_input('host', value=DEFAULT_HOST, help='netdata host to pull data from')
+after = st.sidebar.number_input('after', value=DEFAULT_AFTER)
+before = st.sidebar.number_input('before', value=DEFAULT_BEFORE)
+target_metric = st.sidebar.text_input('target_metric', value=DEFAULT_TARGET_METRIC, help='metric to compare other metrics to')
+charts_regex = st.sidebar.text_input('charts_regex', value=DEFAULT_CHARTS_REGEX, help='regex to match charts')
+opts = st.sidebar.text_area('opts', value=f'freq={DEFAULT_FREQ}\ntop_n={DEFAULT_TOP_N}', help='optional key=value params separated by new line')
 opts_dict = {opt.split('=')[0].strip():opt.split('=')[1].strip() for opt in opts.split('\n')}
-print(opts_dict)
-freq = str(opts_dict.get('freq','15s'))
-top_n = int(opts_dict.get('top_n','50'))
+freq = str(opts_dict.get('freq',DEFAULT_FREQ))
+top_n = int(opts_dict.get('top_n',DEFAULT_TOP_N))
+
+if url != '':
+    url_parsed = urlparse(url)
+    url_fragments = {x.split('=')[0]:x.split('=')[1] for x in url_parsed.fragment.split(';') if '=' in x}
+    host = f'{url_parsed.hostname}:{url_parsed.port}' if url_parsed.port else f'{url_parsed.hostname}'
+    highlight_after = url_fragments.get('highlight_after')
+    highlight_before = url_fragments.get('highlight_before')
+    after = int(int(url_fragments.get('after')) / 1000)
+    before = int(int(url_fragments.get('before')) / 1000)
 
 if run:
     
@@ -69,7 +87,6 @@ if run:
     # plot top_n cols similairty
     st.write('## Top {} most similar metrics'.format(top_n))
     st.dataframe(df_dist_top_n)
-    print(df_dist_top_n[['similarity', 'rank']].to_dict(orient='index'))
     
     # plot top_n most similar metrics
     for col in plot_cols:
