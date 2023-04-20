@@ -94,7 +94,7 @@ if run:
     # get top_n cols to plot
     plot_cols = df_dist_top_n.index.values.tolist()
     
-    # plot top_n cols similairty
+    # plot top_n cols similarity
     st.write(f'## Top {top_n} most similar metrics')
     st.dataframe(df_dist_top_n[['similarity','rank']])
     
